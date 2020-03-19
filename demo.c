@@ -1,6 +1,5 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <u.h>
+#include <libc.h>
 
 #include "defer.h"
 
@@ -10,9 +9,9 @@ void test1(void) {Deferral
 
 	/* legal because deconstruction happens in reverse order */
 	Defer({
-		printf("x is %s\n", x);
+		print("x is %s\n", x);
 		x[1]++;
-		printf("now %s\n", x);
+		print("now %s\n", x);
 	});
 
 	strcpy(x, "Hello world");
@@ -21,17 +20,19 @@ void test1(void) {Deferral
 }
 
 int test2(void) {Deferral
-	puts("1");
+	print("1\n");
 
 	/* caveat: unlike in other programming languages, the return expression
 	 * is evaluated after deferred statements.  Unfortunately, there is no
 	 * good way around this.
 	 */
-	Defer(puts("2"));
-	Return puts("3");
+	Defer(print("2\n"));
+	Return print("3\n");
 }
 
-int main(void) {
+void
+main(int, char*[]) {
 	test1();
-	return test2();
+	test2();
+	return;
 }

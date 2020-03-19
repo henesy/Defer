@@ -1,23 +1,4 @@
-#ifndef DEFER_H
-#define DEFER_H
-
-#ifndef DEFER_MAX_DEFERRED_STATEMENTS
-# define DEFER_MAX_DEFERRED_STATEMENTS 32
-#endif
-
-#if defined(__GNUC__) || defined(__TINYC__)
-
-#define Deferral \
-unsigned char _num_deferrals = 0; \
-void *_defer_return_loc = 0, *_deferrals[DEFER_MAX_DEFERRED_STATEMENTS] = {0};
-
-#ifdef __PCC__
-# define Defer(block) _Defer(block, __LINE__)
-# define Return _Return(__LINE__)
-#else
-# define Defer(block) _Defer(block, __COUNTER__)
-# define Return _Return(__COUNTER__)
-#endif
+#define DEFER_MAX_DEFERRED_STATEMENTS 32
 
 #define _defer_tokpaste(a, b) a ## b
 
@@ -43,16 +24,6 @@ void *_defer_return_loc = 0, *_deferrals[DEFER_MAX_DEFERRED_STATEMENTS] = {0};
 	_defer_fini_ ## n: \
 	return
 
-#else /* !__GNUC__ && !__TINYCC__ */
-
-#include <setjmp.h>
-
-#ifdef _MSC_VER
-# pragma message("You are using the unsafe longjmp()-based defer implementation.  Expect bugs if you don't know what you're doing.")
-#else
-# warning You are using the unsafe longjmp()-based defer implementation.  Expect bugs if you don't know what you're doing.
-#endif
-
 #define Deferral \
 volatile unsigned char _num_deferrals = 0; \
 jmp_buf _defer_return_loc = {0}, _deferrals[DEFER_MAX_DEFERRED_STATEMENTS] = {0};
@@ -76,7 +47,3 @@ jmp_buf _defer_return_loc = {0}, _deferrals[DEFER_MAX_DEFERRED_STATEMENTS] = {0}
 		longjmp(_deferrals[--_num_deferrals], 1); \
 	} \
 } while (0); return
-
-#endif /* __GNUC__ */
-
-#endif /*DEFER_H*/
